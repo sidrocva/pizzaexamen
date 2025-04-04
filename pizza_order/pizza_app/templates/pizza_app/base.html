@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Pizza Order{% endblock %}</title>
+    <!-- Tailwind CSS from CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+    <header class="bg-red-600 text-white shadow-md">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="{% url 'pizza_app:index' %}" class="text-2xl font-bold flex items-center">
+                <i class="fas fa-pizza-slice mr-2"></i> Passione
+            </a>
+            <nav>
+                <ul class="flex space-x-6">
+                    <li><a href="{% url 'pizza_app:index' %}" class="hover:underline">Menu</a></li>
+                    <li>
+                        <a href="{% url 'pizza_app:cart_detail' %}" class="hover:underline flex items-center">
+                            <i class="fas fa-shopping-cart mr-1"></i> 
+                            Cart
+                            <span id="cart-count" class="ml-1 bg-white text-red-600 rounded-full h-6 w-6 flex items-center justify-center text-sm font-semibold">
+                                {{ cart|length }}
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Pizza Express</h3>
+                    <p>The best pizza in THE WORLD.</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Contact</h3>
+                    <p>123 Pizza Street</p>
+                    <p>Phone: (555) 123-4567</p>
+                    <p>Email: info@passione.com</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Hours</h3>
+                    <p>Monday - Friday: 11am - 10pm</p>
+                    <p>Saturday & Sunday: 12pm - 11pm</p>
+                </div>
+            </div>
+            <div class="mt-8 pt-6 border-t border-gray-700 text-center">
+                <p>&copy; {% now "Y" %} passione. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

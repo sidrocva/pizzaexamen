@@ -1,0 +1,106 @@
+{% extends "pizza_app/base.html" %}
+
+{% block title %}{{ product.name }} | Pizza Express{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div class="md:flex">
+        <div class="md:w-1/2">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
+            {% else %}
+            <div class="h-64 md:h-full bg-gray-300 flex items-center justify-center">
+                <i class="fas fa-pizza-slice text-6xl text-gray-400"></i>
+            </div>
+            {% endif %}
+        </div>
+        <div class="md:w-1/2 p-6">
+            <h1 class="text-3xl font-bold mb-4">{{ product.name }}</h1>
+            <div class="text-2xl text-red-600 font-bold mb-4">${{ product.price }}</div>
+            
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold mb-2">Description</h2>
+                <p class="text-gray-700">{{ product.description }}</p>
+            </div>
+            
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold mb-2">Ingredients</h2>
+                <p class="text-gray-700">{{ product.ingredients }}</p>
+            </div>
+            
+            <div class="flex items-center mt-8">
+                <div class="mr-4">
+                    <label for="quantity" class="sr-only">Quantity</label>
+                    <input type="number" id="quantity" name="quantity" min="1" value="1" class="w-16 border border-gray-300 rounded-md p-2 text-center">
+                </div>
+                <button id="add-to-cart" class="bg-red-600 text-white py-3 px-6 rounded-md hover:bg-red-700 transition flex-grow">
+                    Add to Cart
+                </button>
+            </div>
+            
+            <div id="notification" class="mt-4 p-3 rounded-md hidden"></div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-8">
+    <a href="{% url 'pizza_app:index' %}" class="text-red-600 hover:underline flex items-center">
+        <i class="fas fa-arrow-left mr-2"></i> Back to Menu
+    </a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const addToCartButton = document.getElementById('add-to-cart');
+        const quantityInput = document.getElementById('quantity');
+        const notification = document.getElementById('notification');
+        
+        addToCartButton.addEventListener('click', function() {
+            const quantity = parseInt(quantityInput.value);
+            
+            if (quantity < 1) {
+                showNotification('Please select a valid quantity', true);
+                return;
+            }
+            
+            fetch('{% url "pizza_app:cart_add" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    product_id: {{ product.id }},
+                    quantity: quantity
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Update cart count in navbar
+                    document.getElementById('cart-count').textContent = data.cart_total;
+                    
+                    // Show success notification
+                    showNotification('Item added to cart successfully!');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Failed to add item to cart', true);
+            });
+        });
+        
+        function showNotification(message, isError = false) {
+            notification.textContent = message;
+            notification.className = `mt-4 p-3 rounded-md ${isError ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`;
+            notification.classList.remove('hidden');
+            
+            setTimeout(() => {
+                notification.classList.add('hidden');
+            }, 3000);
+        }
+    });
+</script>
+{% endblock %}

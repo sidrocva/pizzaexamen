@@ -1,0 +1,256 @@
+{% extends "pizza_app/base.html" %}
+
+{% block title %}Checkout | Pizza Express{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold mb-4">Checkout</h1>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Order Form -->
+    <div class="lg:col-span-2">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-2xl font-bold mb-6">Delivery Information</h2>
+            
+            <form method="post" id="order-form">
+                {% csrf_token %}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.first_name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.last_name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.email.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-6">
+                    <label for="{{ form.phone.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Phone *</label>
+                    {{ form.phone }}
+                    {% if form.phone.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.phone.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-6">
+                    <label for="{{ form.address.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Address *</label>
+                    {{ form.address }}
+                    {% if form.address.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.address.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="{{ form.city.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">City *</label>
+                        {{ form.city }}
+                        {% if form.city.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.city.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.postal_code.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Postal Code *</label>
+                        {{ form.postal_code }}
+                        {% if form.postal_code.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.postal_code.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label for="{{ form.delivery_time.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Delivery Time *</label>
+                    {{ form.delivery_time }}
+                    {% if form.delivery_time.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.delivery_time.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                {% if error %}
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+                    {{ error }}
+                </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+    
+    <!-- Order Summary -->
+    <div class="lg:col-span-1">
+        <div class="bg-white rounded-lg shadow-lg p-6 sticky top-4">
+            <h2 class="text-2xl font-bold mb-6">Order Summary</h2>
+            
+            <div class="space-y-4 mb-6">
+                {% for item in cart %}
+                <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                    <div class="flex items-center">
+                        {% if item.product.image %}
+                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="w-12 h-12 rounded-full object-cover mr-3">
+                        {% else %}
+                        <div class="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-pizza-slice text-gray-400"></i>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <p class="font-medium">{{ item.product.name }}</p>
+                            <p class="text-sm text-gray-500">{{ item.quantity }} x ${{ item.price }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="font-medium">${{ item.total_price }}</span>
+                        <button class="remove-item ml-4 text-red-600 hover:text-red-900" data-product-id="{{ item.product.id }}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Subtotal and total -->
+            <div class="space-y-2 pt-4 border-t border-gray-200">
+                <div class="flex justify-between">
+                    <span>Subtotal</span>
+                    <span>${{ cart.get_total_price }}</span>
+                </div>
+                </div>
+                <div class="flex justify-between font-bold text-lg pt-2 border-t border-gray-200">
+                    <span>Total</span>
+                    <span>${{ cart.get_total_price }}</span>
+                </div>
+            </div>
+            
+            <div class="mt-6">
+                <button id="payment-button" class="w-full bg-red-600 text-white py-3 px-6 rounded-md hover:bg-red-700 transition flex items-center justify-center">
+                    <i class="fas fa-lock mr-2"></i> Proceed to Payment
+                </button>
+                
+                <div class="text-center mt-4 text-gray-500 text-sm">
+                    <p>Secured payment by Stripe</p>
+                    <div class="flex justify-center mt-2 space-x-2">
+                        <i class="fab fa-cc-visa text-2xl"></i>
+                        <i class="fab fa-cc-mastercard text-2xl"></i>
+                        <i class="fab fa-cc-amex text-2xl"></i>
+                        <i class="fab fa-cc-discover text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-8">
+    <a href="{% url 'pizza_app:cart_detail' %}" class="text-red-600 hover:underline flex items-center">
+        <i class="fas fa-arrow-left mr-2"></i> Back to Cart
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Style the form inputs */
+    input[type="text"], 
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"],
+    textarea,
+    select {
+        @apply w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-600 focus:border-red-600 focus:outline-none;
+    }
+    
+    select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.5rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+        padding-right: 2.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const paymentButton = document.getElementById('payment-button');
+        const orderForm = document.getElementById('order-form');
+        const removeButtons = document.querySelectorAll('.remove-item');
+        
+        // Payment button click
+        paymentButton.addEventListener('click', function() {
+            orderForm.submit();
+        });
+        
+        // Remove item buttons
+        removeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.getAttribute('data-product-id');
+                removeCartItem(productId);
+            });
+        });
+        
+        // Remove item from cart
+        function removeCartItem(productId) {
+            fetch('{% url "pizza_app:cart_remove" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    product_id: productId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Reload page to update totals
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Failed to remove item', true);
+            });
+        }
+        
+        // Toast notification
+        function showToast(message, isError = false) {
+            // Create toast element if it doesn't exist
+            let toast = document.getElementById('toast-notification');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast-notification';
+                toast.className = `fixed bottom-4 right-4 py-2 px-4 rounded-lg shadow-lg z-50 ${isError ? 'bg-red-500' : 'bg-green-500'} text-white`;
+                document.body.appendChild(toast);
+            } else {
+                toast.className = `fixed bottom-4 right-4 py-2 px-4 rounded-lg shadow-lg z-50 ${isError ? 'bg-red-500' : 'bg-green-500'} text-white`;
+            }
+            
+            toast.textContent = message;
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+    });
+</script>
+{% endblock %}

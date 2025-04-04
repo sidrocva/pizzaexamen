@@ -1,0 +1,180 @@
+{% extends "pizza_app/base.html" %}
+
+{% block title %}Pizza Express - Menu{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold mb-4 text-center">Our Menu</h1>
+    <p class="text-center text-gray-600 max-w-2xl mx-auto">
+        Choose from our selection of delicious pizzas, refreshing drinks, and tasty sides.
+        All made with fresh ingredients and delivered right to your door.
+    </p>
+</div>
+
+<div class="flex flex-col md:flex-row">
+    <!-- Category navigation sidebar -->
+    <div class="md:w-1/4 mb-6 md:mb-0 md:pr-4">
+        <div class="bg-white rounded-lg shadow p-4 sticky top-4">
+            <h2 class="text-xl font-bold mb-4">Categories</h2>
+            <ul>
+                <li class="mb-2">
+                    <a href="#all" class="block py-2 px-4 bg-red-600 text-white rounded-md hover:bg-red-700 transition">
+                        All Items
+                    </a>
+                </li>
+                {% for category in categories %}
+                <li class="mb-2">
+                    <a href="#{{ category.slug }}" class="block py-2 px-4 bg-gray-200 rounded-md hover:bg-gray-300 transition">
+                        {{ category.name }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Products grid -->
+    <div class="md:w-3/4">
+        <section id="all" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 pb-2 border-b-2 border-red-600">All Items</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for product in products %}
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                    {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-48 object-cover">
+                    {% else %}
+                    <div class="w-full h-48 bg-gray-300 flex items-center justify-center">
+                        <i class="fas fa-pizza-slice text-4xl text-gray-400"></i>
+                    </div>
+                    {% endif %}
+                    <div class="p-4">
+                        <h3 class="text-xl font-bold mb-2">{{ product.name }}</h3>
+                        <p class="text-gray-600 mb-4 line-clamp-2">{{ product.description }}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xl font-bold text-red-600">${{ product.price }}</span>
+                            <button 
+                                class="add-to-cart-btn bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition"
+                                data-product-id="{{ product.id }}"
+                            >
+                                Add to Cart
+                            </button>
+                        </div>
+                        <a href="{% url 'pizza_app:product_detail' product.id product.slug %}" class="block text-center text-red-600 hover:underline mt-3">View Details</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        {% for category in categories %}
+        <section id="{{ category.slug }}" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 pb-2 border-b-2 border-red-600">{{ category.name }}</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for product in category.products.all %}
+                {% if product.available %}
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                    {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-48 object-cover">
+                    {% else %}
+                    <div class="w-full h-48 bg-gray-300 flex items-center justify-center">
+                        <i class="fas fa-pizza-slice text-4xl text-gray-400"></i>
+                    </div>
+                    {% endif %}
+                    <div class="p-4">
+                        <h3 class="text-xl font-bold mb-2">{{ product.name }}</h3>
+                        <p class="text-gray-600 mb-4 line-clamp-2">{{ product.description }}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xl font-bold text-red-600">${{ product.price }}</span>
+                            <button 
+                                class="add-to-cart-btn bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition"
+                                data-product-id="{{ product.id }}"
+                            >
+                                Add to Cart
+                            </button>
+                        </div>
+                        <a href="{% url 'pizza_app:product_detail' product.id product.slug %}" class="block text-center text-red-600 hover:underline mt-3">View Details</a>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </section>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Product Modal -->
+<div id="product-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md max-h-screen overflow-y-auto m-4">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="modal-title" class="text-2xl font-bold"></h2>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add to cart functionality
+        const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+        
+        addToCartButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.getAttribute('data-product-id');
+                addToCart(productId, 1);
+            });
+        });
+
+        function addToCart(productId, quantity) {
+            fetch('{% url "pizza_app:cart_add" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    quantity: quantity
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Update cart count in navbar
+                    document.getElementById('cart-count').textContent = data.cart_total;
+                    
+                    // Show toast notification
+                    showToast('Item added to cart!');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Failed to add item to cart', true);
+            });
+        }
+
+        // Toast notification
+        function showToast(message, isError = false) {
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-4 right-4 py-2 px-4 rounded-lg shadow-lg z-50 ${isError ? 'bg-red-500' : 'bg-green-500'} text-white`;
+            toast.textContent = message;
+            
+            // Add to body
+            document.body.appendChild(toast);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+    });
+</script>
+{% endblock %}
