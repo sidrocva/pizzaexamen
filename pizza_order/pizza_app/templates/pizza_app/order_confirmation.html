@@ -1,13 +1,16 @@
-<!-- pizza_order/pizza_app/templates/pizza_app/order_confirmation.html -->
+{% extends "pizza_app/base.html" %}
 
-<div class="container mx-auto px-4 py-8">
-    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
-      <h2 class="text-2xl font-bold mb-4">Order Successvol</h2>
-      <p>Bedankt voor je order! Het restaurant gaat zo snel mogelijk aan de slag om je order voor de deur te krijgen!</p>
-      <p>Order ID: {{ order.id }}</p>
-      <p>Order Total: ${{ order.get_total_price }}</p>
+{% block content %}
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+            <h2 class="text-3xl font-bold mb-4">Order Successvol!</h2>
+            <p class="text-lg">Bedankt voor je order! Ons team zal zo snel mogelijk je order voorbereiden en bezorgen.</p>
+            <p class="text-lg">Order ID: {{ order.id }}</p>
+            <p class="text-lg">Order Total: ${{ order.get_total_price }}</p>
+            <p class="text-lg">We zullen je op de hoogte houden van de status van je order.</p>
+        </div>
+        <div class="flex justify-center">
+            <a href="{% url 'pizza_app:index' %}" class="bg-green-600 text-white py-3 px-6 rounded-md hover:bg-green-700 transition">Terug naar Home</a>
+        </div>
     </div>
-    <div class="flex justify-center">
-      <a href="{% url 'pizza_app:index' %}" class="bg-green-600 text-white py-3 px-6 rounded-md hover:bg-green-700 transition">Return to Home</a>
-    </div>
-  </div>
+{% endblock %}
