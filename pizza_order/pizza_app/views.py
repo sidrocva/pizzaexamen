@@ -183,3 +183,7 @@ def stripe_webhook(request):
         return HttpResponse(status=200)
     except Exception as e:
         return HttpResponse(status=400)
+
+#about page for pizza app
+def about(request):
+    return render(request, 'pizza_app/about.html')

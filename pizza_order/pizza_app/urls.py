@@ -14,4 +14,5 @@ urlpatterns = [
     path('order/confirmation/<uuid:order_id>/', views.order_confirmation, name='order_confirmation'),
     path('order/failure/<uuid:order_id>/', views.order_failure, name='order_failure'),
     path('webhook/stripe/', views.stripe_webhook, name='stripe_webhook'),
+    path('about/', views.about, name='about'),
 ]
